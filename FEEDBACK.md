@@ -41,7 +41,9 @@ Do not skip a box to “finish the demo.”
 
 | When | Surface | What I did | What happened | Wanted |
 |---|---|---|---|---|
-| | CLI | `getstream agents -h` | unknown command | `agents` on beta |
+| 2026-10-16 | CLI | `getstream agents -h` | unknown command on `1.1.0` | `agents` on beta |
+| 2026-10-16 | GitHub | `gh repo create` + push | Worked as Seetha-lab. Repo: https://github.com/Seetha-lab/docs-gap | — |
+| | Dashboard | connect GitHub/Linear | not started | need beta CLI |
 | | | | | |
 
 ## Naming dump (they asked)
