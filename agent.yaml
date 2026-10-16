@@ -1,0 +1,27 @@
+name: docs-gap
+description: Finds a hole in Stream docs, checks the official page and the code, then opens a GitHub PR or a Linear issue.
+mode: text
+llm: llm-fast
+tools:
+  progressive: true
+
+# Catalog MCP (connect once on the dashboard, label company).
+# GitHub writes the PR. Linear is the fallback if docs are not in a repo we can branch.
+# Slack posts the gap so any team can see it.
+connectors:
+  - name: github
+    connection: company
+  - name: linear
+    connection: company
+    tools:
+      - list_issues
+      - get_issue
+      - save_issue
+      - save_comment
+      - list_teams
+  - name: slack
+
+# Extra MCP servers go here when we have a docs MCP URL. Do not invent one.
+# mcp_servers:
+#   - name: stream-docs
+#     url: https://example.com/mcp
