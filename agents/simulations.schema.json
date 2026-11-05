@@ -1,0 +1,178 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Stream Agent simulations",
+  "description": "simulations/*.yaml: conversations to put the agent through, each a brief for a model playing the caller and what has to be true at the end. Together the files are the whole of the agent's simulations: one taken out is deleted on the next sync.",
+  "$comment": "Written by getstream agents init. Edits are overwritten.",
+  "type": [
+    "array",
+    "null"
+  ],
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "name",
+      "scenario",
+      "assertion"
+    ],
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Unique among the agent's simulations, and what a sync finds it again by."
+      },
+      "scenario": {
+        "type": "string",
+        "description": "What the caller wants, in your own words and over as many turns as it takes. A brief rather than a script: it may depend on what the agent says back."
+      },
+      "assertion": {
+        "type": "string",
+        "description": "What has to be true at the end for a run to have passed."
+      },
+      "mode": {
+        "type": "string",
+        "enum": [
+          "text",
+          "audio"
+        ],
+        "default": "text",
+        "description": "text hands the agent the words; audio speaks them and runs the whole pipeline, so what is judged is what a caller would have heard."
+      },
+      "variations": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10,
+        "default": 1,
+        "description": "How many ways of asking the same thing one run tries. The scenario as written is always the first of them."
+      },
+      "max_turns": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 200,
+        "default": 12,
+        "description": "How many times the caller may speak before the conversation is stopped."
+      },
+      "caller_target": {
+        "description": "The model that plays the caller. Left out, llm-scenario-runner.",
+        "anyOf": [
+          {
+            "type": "string",
+            "enum": [
+              "llm-fast",
+              "llm-smart",
+              "llm-thinking",
+              "llm-conversational",
+              "llm-flow",
+              "llm-analysis",
+              "llm-judge",
+              "llm-scenario-runner",
+              "vlm",
+              "en-high-accuracy",
+              "en-low-latency",
+              "multilingual-high-accuracy",
+              "multilingual-low-latency"
+            ],
+            "description": "A capability shortcut the router resolves to a model."
+          },
+          {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]+/[^\\s]+$",
+            "description": "A provider/model, such as openai/gpt-5.6."
+          }
+        ]
+      },
+      "judge_target": {
+        "description": "The model that rules on the conversations against the assertion. Left out, llm-judge.",
+        "anyOf": [
+          {
+            "type": "string",
+            "enum": [
+              "llm-fast",
+              "llm-smart",
+              "llm-thinking",
+              "llm-conversational",
+              "llm-flow",
+              "llm-analysis",
+              "llm-judge",
+              "llm-scenario-runner",
+              "vlm",
+              "en-high-accuracy",
+              "en-low-latency",
+              "multilingual-high-accuracy",
+              "multilingual-low-latency"
+            ],
+            "description": "A capability shortcut the router resolves to a model."
+          },
+          {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]+/[^\\s]+$",
+            "description": "A provider/model, such as openai/gpt-5.6."
+          }
+        ]
+      },
+      "caller_stt": {
+        "description": "How the caller hears the agent. Audio simulations only.",
+        "anyOf": [
+          {
+            "type": "string",
+            "enum": [
+              "stt-fast",
+              "stt-accurate",
+              "en-realtime-best",
+              "en-slow-best",
+              "en-recorded",
+              "multi-language-realtime-best",
+              "multi-language-slow-best",
+              "multilingual-recorded",
+              "en-high-accuracy",
+              "en-low-latency",
+              "multilingual-high-accuracy",
+              "multilingual-low-latency"
+            ],
+            "description": "A capability shortcut the router resolves to a model."
+          },
+          {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]+/[^\\s]+$",
+            "description": "A provider/model, such as openai/gpt-5.6."
+          }
+        ]
+      },
+      "caller_tts": {
+        "description": "How the caller speaks. Audio simulations only.",
+        "anyOf": [
+          {
+            "type": "string",
+            "enum": [
+              "tts-fast",
+              "tts-quality",
+              "en-recorded",
+              "multilingual-recorded",
+              "en-high-accuracy",
+              "en-low-latency",
+              "multilingual-high-accuracy",
+              "multilingual-low-latency"
+            ],
+            "description": "A capability shortcut the router resolves to a model."
+          },
+          {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]+/[^\\s]+$",
+            "description": "A provider/model, such as openai/gpt-5.6."
+          }
+        ]
+      },
+      "caller_voice": {
+        "type": "string",
+        "description": "The voice the caller speaks in. Audio simulations only."
+      },
+      "tags": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "Cost labels carried onto every request the simulation makes."
+      }
+    }
+  }
+}

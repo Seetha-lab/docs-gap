@@ -1,0 +1,4 @@
+- Chat send payload: `controllers/chat/v1/payload/message.go` — `text` is `utf8`, not required
+- Message model: `types/message.go` — `TextToHTML`
+- Android: `MessageComposer.kt` `isInputValid`; `ChatClient.sendMessage`; `ensureId` `{userId}-{uuid}`
+- JS: `GetStream/stream-chat-js` `channel.sendMessage`

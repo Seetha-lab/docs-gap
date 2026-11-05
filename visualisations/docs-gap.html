@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Docs Gap</title>
+<meta name="description" content="A Stream agent that turns a Support question into a docs fix — check the page, check the code, wait for a yes, then open a PR." />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Tailwind CDN for utilities -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  // CRITICAL: disable Tailwind preflight. Tailwind's CDN injects preflight CSS
+  // AFTER our <style> block, which resets h1/h2/h3 font-size and font-weight
+  // to inherit. Without this, all headings render as body text.
+  tailwind.config = { corePlugins: { preflight: false } };
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<!--
+  Optional libraries — uncomment ONLY when used on this page:
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+-->
+
+<style>
+  :root {
+    --bg: #F4F1EA;
+    --surface: #FAF7F0;
+    --surface-2: #EFEADF;
+    --ink: #1F1E1B;
+    --ink-muted: #6B6862;
+    --border: #E7E2D7;
+    --accent: #D97757;
+    --accent-hover: #C96A47;
+    --accent-tint: #F5E6DD;
+    --success: #5A8A5C;
+    --warn: #C28A3C;
+    --danger: #B85A4A;
+
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-serif: "Source Serif 4", "Iowan Old Style", "Apple Garamond", Georgia, serif;
+    --font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+
+    /* Type scale — 7 sizes. Don't add more. Use these variables, not raw px. */
+    --fs-display: clamp(40px, 6vw, 64px);   /* h1 hero */
+    --fs-h2:      clamp(28px, 3.5vw, 36px);
+    --fs-h3:      22px;
+    --fs-lead:    20px;                     /* hero subtitle, card titles for emphasis */
+    --fs-body:    17px;                     /* default body, inputs */
+    --fs-small:   14px;                     /* table cells, captions, meta, callout body */
+    --fs-micro:   12px;                     /* eyebrows, pills, table headers, kbd hints */
+
+    --radius-sm: 4px;
+    --radius: 8px;
+    --radius-lg: 14px;
+
+    --topbar-h: 60px;
+    --sidenav-w: 260px;
+
+    --shadow-sm: 0 1px 2px rgba(31, 30, 27, 0.04);
+    --shadow: 0 4px 12px rgba(31, 30, 27, 0.06);
+  }
+
+  [data-theme="dark"] {
+    --bg: #1A1815;
+    --surface: #221F1B;
+    --surface-2: #2A2622;
+    --ink: #EFEAE0;
+    --ink-muted: #A09A8E;
+    --border: #332F28;
+    --accent: #E08A6E;
+    --accent-hover: #EB9A7E;
+    --accent-tint: #2E2520;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: var(--fs-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  /* Typography */
+  h1, h2, h3 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  h1 { font-size: var(--fs-display); font-weight: 400; letter-spacing: -0.02em; line-height: 1.05; margin: 0 0 28px; scroll-margin-top: calc(var(--topbar-h) + 24px); }
+  h2 { font-size: var(--fs-h2); line-height: 1.15; margin: 0 0 24px; scroll-margin-top: calc(var(--topbar-h) + 24px); }
+  h3 { font-size: var(--fs-h3); font-weight: 600; line-height: 1.3; margin: 40px 0 14px; }
+  h4 { font-family: var(--font-sans); font-size: var(--fs-micro); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-muted); margin: 32px 0 14px; }
+  /* Headings that lead a block shouldn't double up on top margin */
+  h2 + h3, h2 + h4, h3:first-child, h4:first-child,
+  section > .container > h3:first-child, section > .container > h4:first-child,
+  .card > h3:first-child, .card > h4:first-child { margin-top: 0; }
+
+  section { scroll-margin-top: calc(var(--topbar-h) + 24px); }
+
+  p { margin: 0 0 18px; color: var(--ink); }
+  .lead { font-size: var(--fs-lead); line-height: 1.55; color: var(--ink-muted); margin-bottom: 28px; }
+  .pill + h1 { margin-top: 28px; }
+  .muted { color: var(--ink-muted); }
+  strong { font-weight: 600; }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.15s; }
+  a:hover { border-bottom-color: var(--accent); }
+
+  code, pre { font-family: var(--font-mono); font-size: 0.92em; }
+  code { background: var(--surface-2); padding: 2px 6px; border-radius: var(--radius-sm); }
+  pre { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; overflow-x: auto; line-height: 1.5; }
+  pre code { background: transparent; padding: 0; }
+
+  /* Layout */
+  .container { max-width: 880px; margin: 0 auto; padding: 0 28px; }
+  .container-wide { max-width: 1120px; margin: 0 auto; padding: 0 28px; }
+  main { min-width: 0; } /* allow content to shrink in grid */
+  main > section { padding: 88px 0; border-top: 1px solid var(--border); }
+  main > section:first-of-type { border-top: none; }
+
+  .page-shell {
+    display: grid;
+    grid-template-columns: var(--sidenav-w) 1fr;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Top bar */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(244, 241, 234, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    height: var(--topbar-h);
+  }
+  [data-theme="dark"] .topbar { background: rgba(26, 24, 21, 0.85); }
+  .topbar-inner { display: flex; align-items: center; justify-content: space-between; padding: 0 24px; max-width: 1400px; margin: 0 auto; height: 100%; gap: 16px; }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .brand { font-family: var(--font-serif); font-size: var(--fs-body); font-weight: 500; }
+  .brand-dot { display: inline-block; width: 10px; height: 10px; background: var(--accent); border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+
+  /* Side navigation */
+  .sidenav {
+    position: sticky;
+    top: var(--topbar-h);
+    height: calc(100vh - var(--topbar-h));
+    overflow-y: auto;
+    padding: 24px 16px 24px 24px;
+    border-right: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .sidenav-search-wrap {
+    position: relative;
+    margin-bottom: 16px;
+  }
+  .sidenav-search {
+    width: 100%;
+    padding: 8px 38px 8px 34px;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: var(--font-sans);
+    font-size: var(--fs-small);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .sidenav-search:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-tint);
+  }
+  .sidenav-search-icon {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--ink-muted);
+    pointer-events: none;
+  }
+  .sidenav-search-kbd {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    font-family: var(--font-mono); font-size: var(--fs-micro);
+    color: var(--ink-muted);
+    background: var(--surface-2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    pointer-events: none;
+  }
+  .sidenav-label {
+    font-size: var(--fs-micro);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-muted);
+    font-weight: 600;
+    padding: 0 10px;
+    margin-bottom: 6px;
+  }
+  .sidenav-list { list-style: none; padding: 0; margin: 0; }
+  .sidenav-link {
+    display: block;
+    padding: 6px 12px;
+    margin: 1px 0;
+    font-size: var(--fs-small);
+    color: var(--ink-muted);
+    border-left: 2px solid transparent;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+    line-height: 1.4;
+    cursor: pointer;
+    border-bottom: none;
+  }
+  .sidenav-link:hover {
+    color: var(--ink);
+    background: var(--surface-2);
+    border-bottom: none;
+  }
+  .sidenav-link.active {
+    color: var(--accent-hover);
+    border-left-color: var(--accent);
+    background: var(--accent-tint);
+    font-weight: 500;
+  }
+  [data-theme="dark"] .sidenav-link.active { color: var(--accent); }
+  .sidenav-link.hidden { display: none; }
+  .sidenav-empty {
+    padding: 12px;
+    font-size: var(--fs-small);
+    color: var(--ink-muted);
+    text-align: center;
+    display: none;
+  }
+  .sidenav-empty.visible { display: block; }
+
+  /* Mobile drawer */
+  .nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--ink);
+    padding: 6px;
+    cursor: pointer;
+  }
+  .sidenav-scrim {
+    display: none;
+    position: fixed; inset: var(--topbar-h) 0 0 0;
+    background: rgba(31, 30, 27, 0.3);
+    z-index: 35;
+  }
+  body.nav-open .sidenav-scrim { display: block; }
+
+  @media (max-width: 900px) {
+    .page-shell { grid-template-columns: 1fr; }
+    .sidenav {
+      position: fixed;
+      top: var(--topbar-h);
+      left: 0;
+      width: 280px;
+      max-width: 85vw;
+      background: var(--bg);
+      z-index: 40;
+      transform: translateX(-100%);
+      transition: transform 0.2s ease;
+    }
+    body.nav-open .sidenav { transform: translateX(0); }
+    .nav-toggle { display: inline-flex; }
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-sans); font-size: var(--fs-small); font-weight: 500;
+    padding: 8px 14px; border-radius: var(--radius);
+    background: var(--surface); color: var(--ink);
+    border: 1px solid var(--border); cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn:hover { background: var(--surface-2); border-color: var(--ink-muted); }
+  .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: white; }
+  .btn-icon { padding: 8px; }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+  }
+  .card-tinted { background: var(--accent-tint); border-color: transparent; }
+
+  /* Grid helpers */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 720px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  /* TL;DR list */
+  .tldr { list-style: none; padding: 0; margin: 0; }
+  .tldr li {
+    position: relative; padding: 8px 0 8px 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tldr li:last-child { border-bottom: none; }
+  .tldr li::before {
+    content: ""; position: absolute; left: 0; top: 18px;
+    width: 16px; height: 2px; background: var(--accent);
+  }
+
+  /* Inline form (calculator) */
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .field label { font-size: var(--fs-small); font-weight: 500; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .field input, .field select {
+    font-family: var(--font-sans); font-size: var(--fs-body);
+    padding: 10px 12px;
+    background: var(--bg); color: var(--ink);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-tint);
+  }
+
+  /* Result display */
+  .result {
+    font-family: var(--font-serif); font-size: 42px; font-weight: 500;
+    color: var(--ink); margin-top: 8px;
+  }
+  .result-label { font-size: var(--fs-small); color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+
+  /* Pill / tag */
+  .pill {
+    display: inline-flex; align-items: center;
+    font-size: var(--fs-micro); font-weight: 500;
+    padding: 4px 10px; border-radius: 999px;
+    background: var(--accent-tint); color: var(--accent-hover);
+  }
+  [data-theme="dark"] .pill { color: var(--accent); }
+
+  /* Scenario toggle (radio cards) */
+  .scenario-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .scenario { cursor: pointer; }
+  .scenario input { position: absolute; opacity: 0; pointer-events: none; }
+  .scenario-card {
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: all 0.15s ease;
+  }
+  .scenario input:checked + .scenario-card {
+    border-color: var(--accent);
+    background: var(--accent-tint);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  .scenario-card-title { font-weight: 600; font-size: var(--fs-body); margin-bottom: 2px; }
+  .scenario-card-desc { font-size: var(--fs-small); color: var(--ink-muted); }
+
+  /* Timeline */
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before {
+    content: ""; position: absolute; left: 7px; top: 6px; bottom: 6px;
+    width: 2px; background: var(--border);
+  }
+  .timeline-step { position: relative; padding-bottom: 24px; }
+  .timeline-step::before {
+    content: ""; position: absolute; left: -28px; top: 6px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--bg); border: 2px solid var(--accent);
+  }
+  .timeline-step h3 { margin-bottom: 4px; font-family: var(--font-sans); font-size: var(--fs-body); font-weight: 600; }
+
+  /* Callouts */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-tint);
+    padding: 16px 20px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 20px 0;
+  }
+  .callout-warn { border-left-color: var(--warn); background: rgba(194, 138, 60, 0.08); }
+  .callout-danger { border-left-color: var(--danger); background: rgba(184, 90, 74, 0.08); }
+  .callout-title { font-weight: 600; font-size: var(--fs-small); margin-bottom: 4px; }
+
+  /* Source file links */
+  .src-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .src-list code {
+    display: inline-block;
+    font-size: var(--fs-small);
+    padding: 6px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  /* Mermaid wrapper */
+  .diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    overflow-x: auto;
+    text-align: center;
+  }
+
+  /* Footer */
+  footer { padding: 40px 0 80px; color: var(--ink-muted); font-size: var(--fs-small); text-align: center; border-top: 1px solid var(--border); }
+  footer .brand { font-size: var(--fs-small); color: var(--ink-muted); }
+
+
+  table.plain { width: 100%; border-collapse: collapse; font-size: var(--fs-small); }
+  table.plain th {
+    text-align: left; font-size: var(--fs-micro); text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--ink-muted);
+    padding: 10px 12px; border-bottom: 1px solid var(--border); font-weight: 600;
+  }
+  table.plain td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.plain tr:last-child td { border-bottom: none; }
+  .field input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); }
+  .share-pre {
+    white-space: pre-wrap;
+    font-size: var(--fs-small);
+    margin: 0;
+    max-height: 320px;
+    line-height: 1.55;
+  }
+  .preset-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+  .copy-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .topbar-actions { display: flex; align-items: center; gap: 8px; }
+
+  /* Print */
+  @media print {
+    .topbar, .sidenav, .sidenav-scrim, .no-print { display: none !important; }
+    .page-shell { grid-template-columns: 1fr; }
+    section { page-break-inside: avoid; padding: 30px 0; }
+    body { background: white; color: black; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ TOP BAR ============ -->
+<div class="topbar no-print">
+  <div class="topbar-inner">
+    <div class="topbar-left">
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" title="Toggle navigation">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="brand"><span class="brand-dot"></span>Docs Gap</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn" type="button" id="copy-update" data-copy="team">Copy team update</button>
+      <button class="btn btn-icon" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="sidenav-scrim" id="sidenav-scrim"></div>
+
+<!-- ============ PAGE SHELL: sidenav + main ============ -->
+<div class="page-shell">
+
+  <aside class="sidenav no-print" id="sidenav" aria-label="Page navigation">
+    <div class="sidenav-search-wrap">
+      <svg class="sidenav-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" class="sidenav-search" id="sidenav-search" placeholder="Search sections" autocomplete="off" aria-label="Search sections" />
+      <span class="sidenav-search-kbd" id="sidenav-search-kbd">⌘K</span>
+    </div>
+    <div class="sidenav-label">On this page</div>
+    <nav><ul class="sidenav-list" id="sidenav-list"></ul></nav>
+    <div class="sidenav-empty" id="sidenav-empty">No matches</div>
+  </aside>
+
+  <main>
+
+    <!-- ============ HERO ============ -->
+    <section id="overview" style="padding-top: 112px;">
+      <div class="container">
+        <span class="pill">Stream agent · internal</span>
+        <h1>Docs Gap</h1>
+        <p class="lead">You give it a customer question or a docs URL. It checks the official Stream page, then the code. If the docs are missing or wrong, it shows a patch — and it does not open a PR until someone says yes.</p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-primary" type="button" id="copy-update-hero" data-copy="team">Copy team update</button>
+          <a class="btn" href="#tell-the-team">Tell the team</a>
+          <a class="btn" href="#skip-rule">Skip-rule helper</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TL;DR ============ -->
+    <section id="tldr">
+      <div class="container">
+        <h4>TL;DR</h4>
+        <ul class="tldr">
+          <li>The agent is designed, in GitHub, and has two verified Chat gaps with paste-ready patches. It has not yet run a live dashboard session.</li>
+          <li>Gap 1 is empty <code>text: ""</code> on send-message. Gap 2 is new: <code>removeMembers</code> of a deleted user is 400 / code 4, and GDPR docs never say that.</li>
+          <li>It never queries a customer app, never writes Zendesk, and never opens a PR until someone says yes.</li>
+          <li>The helpful bit for Support: a skip-rule helper for the deleted-user 400s that keep showing up as “cleanup failed.”</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ TELL THE TEAM ============ -->
+    <section id="tell-the-team">
+      <div class="container">
+        <h2>Tell the team</h2>
+        <p class="muted">One paste for Slack or email. No customer name, no app keys. Copy it, then screen-share the skip helper if they want to see it live.</p>
+        <div class="card">
+          <div class="copy-row">
+            <h4 style="margin: 0;">Slack / email</h4>
+            <button class="btn btn-primary" type="button" id="copy-update-card" data-copy="team">Copy</button>
+          </div>
+          <pre class="share-pre" id="team-update">Docs Gap is a Stream agent for docs holes.
+
+You give it a customer question or a docs URL. It checks the official page and the code. If there is a real hole, it shows a patch and waits for a yes before it opens a PR. It does not query customer apps and it does not write Zendesk.
+
+Done
+• Repo: https://github.com/Seetha-lab/docs-gap
+• Loop + nested skills + GitHub / Linear / Slack connectors designed
+• Two verified Chat gaps with paste-ready patches:
+  1. empty text: "" on send-message
+  2. removeMembers of a deleted user is 400 / code 4 — GDPR docs never say that (from a real group-chat ticket; no customer name in a public PR)
+
+Not done yet
+• No live dashboard session. Installed CLI is 1.1.0 (agents / docs missing). Need beta CLI + a connector labelled company. Feedback is in FEEDBACK.md.
+
+Show this page: loop mermaid → ticket picker “Cleanup 400” → skip helper (400/4 = Skip, 408 = Retry).</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ WHAT WE BUILT ============ -->
+    <section id="what-we-built">
+      <div class="container">
+        <h2>What we built</h2>
+        <p class="muted">How it is wired on Stream’s agent stack — designed vs actually run.</p>
+
+        <div class="grid-2" style="margin-top: 8px;">
+          <div class="card">
+            <h4>Conversation loop</h4>
+            <p>Ask → verify docs → check code → confirm → PR. Six turns, in order, interruptible. Written in <code>instructions.md</code>.</p>
+            <p class="muted" style="font-size: var(--fs-small); margin: 0;">Status: designed. Not yet run on the router.</p>
+          </div>
+          <div class="card">
+            <h4>Nested skills</h4>
+            <p>Playbooks for Chat, Video, Feeds, Moderation, plus <code>verify-docs</code>, <code>check-code</code>, <code>open-pr</code>. Chat now also knows the deleted-user hole.</p>
+            <p class="muted" style="font-size: var(--fs-small); margin: 0;">Status: designed. Harness and the one-file template disagree.</p>
+          </div>
+          <div class="card">
+            <h4>Connectors</h4>
+            <p>GitHub, Linear, Slack in <code>agent.yaml</code>. Catalog MCP. Extra <code>mcp_servers</code> left empty on purpose — no invented URL.</p>
+            <p class="muted" style="font-size: var(--fs-small); margin: 0;">Status: sync fails until a dashboard connection is labelled <code>company</code>.</p>
+          </div>
+          <div class="card">
+            <h4>CLI + dashboard</h4>
+            <p>Repo is live at Seetha-lab/docs-gap. Installed CLI is 1.1.0 — no <code>agents</code>, no <code>docs</code>. Beta install is the next real run.</p>
+            <p class="muted" style="font-size: var(--fs-small); margin: 0;">Status: blocked on beta. Feedback already logged for the AI team.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ THE LOOP ============ -->
+    <section id="the-loop">
+      <div class="container">
+        <h2>The six-turn loop</h2>
+        <p>Never jump to a PR. If the official page already covers it, stop. If docs and code disagree, code wins — and we say both.</p>
+
+        <div class="diagram">
+          <pre class="mermaid">
+graph TD
+  T1["1 · What is the hole?"] --> T2["2 · Pick Chat / Video / Feeds / Mod"]
+  T2 --> T3["3 · Verify official docs"]
+  T3 --> Covered{"Already on the page?"}
+  Covered -->|Yes| Stop["Say so and stop"]
+  Covered -->|No| T4["4 · Check the code"]
+  T4 --> T5["5 · Show the patch · wait"]
+  T5 -->|They say no| Hold["Do not open a PR"]
+  T5 -->|They say yes| T6["6 · GitHub PR or Linear"]
+          </pre>
+        </div>
+
+        <div class="timeline" style="margin-top: 40px;">
+          <div class="timeline-step">
+            <h3>Turn 1 — the hole</h3>
+            <p>A customer question, a ticket dump, or a docs URL. If they paste a payload, use only what they pasted. No customer-app queries.</p>
+          </div>
+          <div class="timeline-step">
+            <h3>Turn 2 — the product</h3>
+            <p>Chat, Video, Feeds, or Moderation. Run that playbook so the agent uses the right holes, not a generic guess.</p>
+          </div>
+          <div class="timeline-step">
+            <h3>Turn 3 — verify docs</h3>
+            <p>Official getstream.io pages only. If it is already documented, say so and stop. Do not invent a gap.</p>
+          </div>
+          <div class="timeline-step">
+            <h3>Turn 4 — check code</h3>
+            <p>Only if the page is missing or wrong. Cite the file. Code wins when the two disagree.</p>
+          </div>
+          <div class="timeline-step">
+            <h3>Turn 5 — confirm</h3>
+            <p>One-sentence gap, docs URL, what the code does, the paragraph to add. Then: <strong>PR or Linear?</strong> Wait.</p>
+          </div>
+          <div class="timeline-step">
+            <h3>Turn 6 — ship</h3>
+            <p>Prefer a GitHub PR. If there is no writable docs repo, open Linear with the same markdown. Slack note if connected.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ GAP 1 ============ -->
+    <section id="gap-empty-text">
+      <div class="container">
+        <h2>Gap 1 · empty text</h2>
+        <p>The first verified hole. Docs say <code>text</code> is optional. They do not say when empty is normal, that the default UI will not send it, or that two SDK ids are two messages.</p>
+
+        <div class="grid-2">
+          <div class="card">
+            <h4>Docs say</h4>
+            <p style="margin: 0;"><code>text</code> is optional on send-message. No mention of empty twins, UI vs API, or <code>{userId}-{uuid}</code>.</p>
+          </div>
+          <div class="card">
+            <h4>Code does</h4>
+            <p style="margin: 0;">The send payload allows empty. Android’s default composer does not. Two ids a few milliseconds apart are two sends, not one edit.</p>
+          </div>
+        </div>
+
+        <div class="callout" style="margin-top: 24px;">
+          <div class="callout-title">The patch</div>
+          Empty text is normal for attachments, polls, location, or MML with no caption. A message with no text and no attachments is accepted by the API and not sent by default UI. A soft-delete keeps original text. Patch lives in <code>proposed/chat-send-message-empty-text.md</code>.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ GAP 2 NEW ============ -->
+    <section id="gap-deleted-user">
+      <div class="container">
+        <h2>Gap 2 · deleted user on UpdateChannel</h2>
+        <p>New, from a real group-chat ticket this week. GDPR docs say delete is async and that <code>queryUsers</code> hides the user. They do not say group memberships linger, or that cleaning them up with <code>removeMembers</code> is a 400.</p>
+
+        <div class="diagram">
+          <pre class="mermaid">
+sequenceDiagram
+  participant App
+  participant API
+  participant Task as DeleteUsers task
+  App->>API: DeleteUsers
+  API-->>App: 201 · deleted_at set · task id
+  Note over API: Group memberships still present
+  App->>API: UpdateChannel removeMembers
+  API-->>App: 400 / code 4
+  Task->>API: Strip memberships later
+          </pre>
+        </div>
+
+        <div class="grid-2" style="margin-top: 28px;">
+          <div class="card">
+            <h4>Docs say</h4>
+            <p>Deleting users is asynchronous. <code>queryUsers</code> does not return deleted users. <code>conversations: hard</code> deletes 1:1 chats.</p>
+            <p class="muted" style="font-size: var(--fs-small); margin: 0;">Missing: the 400, the lingering group membership, no <code>exception_fields</code>, no <code>include_deleted</code>.</p>
+          </div>
+          <div class="card">
+            <h4>Code does</h4>
+            <p>Marks <code>deleted_at</code> immediately, then publishes <code>DeleteUsers</code> on the lowest-priority queue. <code>ValidateChannelMembers</code> rejects any id with <code>DeletedAt</code> set — including <code>removeMembers</code> — before a leave message can be stored.</p>
+            <p class="muted" style="font-size: var(--fs-small); margin: 0;">InputError is code 4. Channel not found is 16. Request timeout is 48, not 23.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-danger" style="margin-top: 24px;">
+          <div class="callout-title">What Support should tell the customer</div>
+          Poll <code>GetTask</code>. When it completes, skip <code>removeMembers</code> for that user. Treat 400 / code 4 whose message contains “deleted user” as skip, not retry. Retry 429, 408 / 48, and 5xx. An empty <code>queryUsers</code> is not proof the user was deleted.
+        </div>
+
+        <p style="margin-top: 24px;">Patch: <code>proposed/chat-update-channel-deleted-user.md</code> — add under GDPR → Deleting users, cross-link from Channel Members. Do not name the customer in a public PR.</p>
+      </div>
+    </section>
+
+    <!-- ============ SCENARIO PICKER ============ -->
+    <section id="ticket-picker">
+      <div class="container">
+        <h2>Ticket picker</h2>
+        <p class="muted">Pick the shape of the ticket. The agent should reach the matching gap — or stop, if it is not a docs hole.</p>
+
+        <div class="scenario-group" id="scenario-group">
+          <label class="scenario">
+            <input type="radio" name="scenario" value="empty" checked>
+            <div class="scenario-card">
+              <div class="scenario-card-title">Empty twin</div>
+              <div class="scenario-card-desc">Two messages, one has text: ""</div>
+            </div>
+          </label>
+          <label class="scenario">
+            <input type="radio" name="scenario" value="remove">
+            <div class="scenario-card">
+              <div class="scenario-card-title">Cleanup 400</div>
+              <div class="scenario-card-desc">removeMembers after DeleteUsers</div>
+            </div>
+          </label>
+          <label class="scenario">
+            <input type="radio" name="scenario" value="query">
+            <div class="scenario-card">
+              <div class="scenario-card-title">QueryUsers empty</div>
+              <div class="scenario-card-desc">Is this user deleted?</div>
+            </div>
+          </label>
+          <label class="scenario">
+            <input type="radio" name="scenario" value="notfound">
+            <div class="scenario-card">
+              <div class="scenario-card-title">Channel gone</div>
+              <div class="scenario-card-desc">404 on the same path</div>
+            </div>
+          </label>
+          <label class="scenario">
+            <input type="radio" name="scenario" value="timeout">
+            <div class="scenario-card">
+              <div class="scenario-card-title">Hang then 408</div>
+              <div class="scenario-card-desc">Is this code 23?</div>
+            </div>
+          </label>
+        </div>
+
+        <div class="card" id="scenario-out">
+          <h4 id="sc-label">Empty twin</h4>
+          <p id="sc-body"></p>
+          <p class="muted" id="sc-next" style="font-size: var(--fs-small); margin: 0;"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SKIP HELPER ============ -->
+    <section id="skip-rule">
+      <div class="container">
+        <h2>Skip-rule helper</h2>
+        <p class="muted">For the deleted-user cleanup path. Pick a ticket shape above, or a preset here. Then copy the reply.</p>
+
+        <div class="preset-row" id="preset-row">
+          <button type="button" class="btn" data-preset="deleted400">Typical 400</button>
+          <button type="button" class="btn" data-preset="timeout">408 timeout</button>
+          <button type="button" class="btn" data-preset="notfound">404 channel</button>
+          <button type="button" class="btn" data-preset="ratelimit">429</button>
+          <button type="button" class="btn" data-preset="queryempty">queryUsers empty</button>
+        </div>
+
+        <div class="card" style="margin-top: 8px;">
+          <div class="grid-2">
+            <div>
+              <div class="field">
+                <label for="http-status">HTTP status</label>
+                <select id="http-status">
+                  <option value="400" selected>400</option>
+                  <option value="404">404</option>
+                  <option value="408">408</option>
+                  <option value="429">429</option>
+                  <option value="500">500</option>
+                  <option value="201">201 / 2xx</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="stream-code">Stream code</label>
+                <select id="stream-code">
+                  <option value="4" selected>4 · InputError</option>
+                  <option value="16">16 · Not found</option>
+                  <option value="9">9 · Rate limited</option>
+                  <option value="48">48 · Request timeout</option>
+                  <option value="-1">-1 · Internal</option>
+                  <option value="0">none / 0</option>
+                </select>
+              </div>
+              <div class="field">
+                <label style="text-transform: none; letter-spacing: 0; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                  <input type="checkbox" id="msg-deleted" checked />
+                  Message contains “deleted user”
+                </label>
+              </div>
+              <div class="field">
+                <label style="text-transform: none; letter-spacing: 0; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                  <input type="checkbox" id="query-empty" />
+                  queryUsers returned empty for this id
+                </label>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; justify-content: center;">
+              <div class="result-label">Do this</div>
+              <div class="result" id="skip-result" style="font-size: var(--fs-h2);">—</div>
+              <p class="muted" style="font-size: var(--fs-small); margin-top: 12px; margin-bottom: 0;" id="skip-explain"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 16px;">
+          <div class="copy-row">
+            <h4 style="margin: 0;">What to send</h4>
+            <button class="btn btn-primary" type="button" id="copy-reply" data-copy="reply">Copy reply</button>
+          </div>
+          <pre class="share-pre" id="reply-text"></pre>
+        </div>
+
+        <table class="plain" style="margin-top: 32px;">
+          <thead>
+            <tr>
+              <th>Signal</th>
+              <th>Meaning</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>400 / 4 + “deleted user”</td>
+              <td>ValidateChannelMembers saw DeletedAt. Leave message never stored.</td>
+              <td>Skip. Do not retry removeMembers.</td>
+            </tr>
+            <tr>
+              <td>404 / 16</td>
+              <td>Channel not found. Not “already removed.”</td>
+              <td>Stop this cid. Different error from 4.</td>
+            </tr>
+            <tr>
+              <td>408 / 48</td>
+              <td>Request timeout. Not code 23.</td>
+              <td>Retry.</td>
+            </tr>
+            <tr>
+              <td>429 / 9</td>
+              <td>Rate limited.</td>
+              <td>Retry with backoff.</td>
+            </tr>
+            <tr>
+              <td>500 / −1</td>
+              <td>Internal.</td>
+              <td>Retry.</td>
+            </tr>
+            <tr>
+              <td>queryUsers empty</td>
+              <td>Never existed, soft-deleted, and hard-deleted all look the same.</td>
+              <td>Not a deleted signal. Poll GetTask instead.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 60s DEMO ============ -->
+    <section id="demo-script">
+      <div class="container">
+        <h2>60-second demo</h2>
+        <p class="muted">What to click when you walk the team through it.</p>
+        <div class="timeline">
+          <div class="timeline-step">
+            <h3>0:00 — the bet</h3>
+            <p>Hit <strong>Copy team update</strong> and paste it in Slack first, so people have the recap while you talk.</p>
+          </div>
+          <div class="timeline-step">
+            <h3>0:10 — the loop</h3>
+            <p>Scroll to the mermaid. Point at “They say no → do not open a PR.” That is the product, not a missing feature.</p>
+          </div>
+          <div class="timeline-step">
+            <h3>0:25 — a live ticket shape</h3>
+            <p>Pick <strong>Cleanup 400</strong>. Read the GDPR miss out loud. This is not a synthetic example.</p>
+          </div>
+          <div class="timeline-step">
+            <h3>0:40 — the helper</h3>
+            <p>Leave 400 / 4 / “deleted user” checked. Show Skip. Flip to 408 / 48. Show Retry. That is the helpful part.</p>
+          </div>
+          <div class="timeline-step">
+            <h3>0:55 — honesty</h3>
+            <p>CLI 1.1.0 cannot sync. Need beta, a <code>company</code> connector, then the empty-text chat. Feedback is already in <code>FEEDBACK.md</code>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ BLOCKED ============ -->
+    <section id="still-blocked">
+      <div class="container">
+        <h2>Still blocked</h2>
+        <p>We did not skip boxes to “finish the demo.” This is what the AI team already has in the feedback log.</p>
+        <table class="plain">
+          <thead>
+            <tr>
+              <th>Surface</th>
+              <th>What happened</th>
+              <th>Need</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>CLI 1.1.0</td>
+              <td><code>agents</code> and <code>docs</code> are unknown commands.</td>
+              <td>Beta CLI, version looks like a date + hash.</td>
+            </tr>
+            <tr>
+              <td>Connectors</td>
+              <td>Sync wants a connection labelled <code>company</code>.</td>
+              <td>Dashboard Library → Connectors, then re-sync.</td>
+            </tr>
+            <tr>
+              <td>Nested skills</td>
+              <td>One markdown file vs a folder with extra files. Harness and template disagree.</td>
+              <td>Confirm which layout the router actually loads.</td>
+            </tr>
+            <tr>
+              <td>MCP extra</td>
+              <td>Left empty. No fake docs MCP URL.</td>
+              <td>A real URL if they want that box ticked.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ WHERE IT LIVES ============ -->
+    <section id="source">
+      <div class="container">
+        <h2>Where it lives</h2>
+        <p class="muted">Repo and local paths. No customer names, no app keys.</p>
+        <div class="src-list">
+          <code>github.com/Seetha-lab/docs-gap</code>
+          <code>instructions.md</code>
+          <code>agent.yaml</code>
+          <code>FEEDBACK.md</code>
+          <code>proposed/chat-send-message-empty-text.md</code>
+          <code>proposed/chat-update-channel-deleted-user.md</code>
+          <code>skills/chat/SKILL.md</code>
+          <code>knowledge/deleted-user-update-channel.md</code>
+          <code>chat · ValidateChannelMembers</code>
+          <code>chat · delete_users.go</code>
+          <code>errors.go · 4 / 16 / 9 / 48 / -1</code>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="container">
+        <div class="brand"><span class="brand-dot"></span>Docs Gap</div>
+        <p style="margin-top: 8px;">Internal team demo · not a customer page · <span id="generated-at"></span></p>
+      </div>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  // ===== Theme toggle =====
+  (function () {
+    const root = document.documentElement;
+    const stored = localStorage.getItem('visualise-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    root.setAttribute('data-theme', stored || (prefersDark ? 'dark' : 'light'));
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem('visualise-theme', next);
+    });
+  })();
+
+  document.getElementById('generated-at').textContent = new Date().toLocaleDateString(undefined, {
+    year: 'numeric', month: 'long', day: 'numeric'
+  });
+
+  // ===== Side navigation: build, scroll-spy, search, mobile drawer =====
+  (function () {
+    const sections = Array.from(document.querySelectorAll('main > section[id]'));
+    const list = document.getElementById('sidenav-list');
+    const search = document.getElementById('sidenav-search');
+    const empty = document.getElementById('sidenav-empty');
+    const sidenav = document.getElementById('sidenav');
+    const scrim = document.getElementById('sidenav-scrim');
+    const toggle = document.getElementById('nav-toggle');
+
+    // Build nav entries from each section's first heading
+    const items = sections.map(sec => {
+      const heading = sec.querySelector('h1, h2');
+      if (!heading) return null;
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = `#${sec.id}`;
+      a.className = 'sidenav-link';
+      a.textContent = heading.textContent.trim();
+      a.dataset.target = sec.id;
+      li.appendChild(a);
+      list.appendChild(li);
+      return { section: sec, li, link: a };
+    }).filter(Boolean);
+
+    // Smooth scroll + close mobile drawer on click
+    items.forEach(({ link, section }) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', `#${section.id}`);
+        if (window.innerWidth <= 900) document.body.classList.remove('nav-open');
+      });
+    });
+
+    // Scroll-spy via IntersectionObserver
+    const setActive = (id) => {
+      items.forEach(({ link }) => link.classList.toggle('active', link.dataset.target === id));
+    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Prefer the topmost section in view
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible.length) setActive(visible[0].target.id);
+      },
+      { rootMargin: '-30% 0px -60% 0px', threshold: 0 }
+    );
+    sections.forEach(s => observer.observe(s));
+
+    // Search: filter nav items by title
+    const normalize = s => s.toLowerCase().trim();
+    search.addEventListener('input', () => {
+      const q = normalize(search.value);
+      let shown = 0;
+      items.forEach(({ link, li }) => {
+        const match = !q || normalize(link.textContent).includes(q);
+        li.classList.toggle('hidden', !match);
+        link.classList.toggle('hidden', !match);
+        if (match) shown++;
+      });
+      empty.classList.toggle('visible', shown === 0);
+    });
+    search.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { search.value = ''; search.dispatchEvent(new Event('input')); search.blur(); }
+      if (e.key === 'Enter') {
+        const firstVisible = items.find(({ li }) => !li.classList.contains('hidden'));
+        if (firstVisible) firstVisible.link.click();
+      }
+    });
+
+    // ⌘K / Ctrl+K focuses search
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        search.focus();
+        search.select();
+      }
+    });
+    // Update the keyboard hint for non-mac users
+    if (!/Mac|iPhone|iPad/i.test(navigator.platform)) {
+      const kbd = document.getElementById('sidenav-search-kbd');
+      if (kbd) kbd.textContent = 'Ctrl K';
+    }
+
+    // Mobile drawer
+    toggle.addEventListener('click', () => document.body.classList.toggle('nav-open'));
+    scrim.addEventListener('click', () => document.body.classList.remove('nav-open'));
+  })();
+
+
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#FAF7F0',
+      primaryTextColor: '#1F1E1B',
+      primaryBorderColor: '#D97757',
+      lineColor: '#6B6862',
+      secondaryColor: '#F5E6DD',
+      fontFamily: 'Inter, sans-serif',
+      fontSize: '15px',
+    },
+  });
+
+  const SCENARIOS = {
+    empty: {
+      label: 'Empty twin',
+      body: 'Docs say text is optional. They do not say empty is normal for attachments, that default UI will not send a blank message, or that two SDK ids are two messages. This is Gap 1 — already patched in proposed/chat-send-message-empty-text.md.',
+      next: 'Agent path: chat skill → verify-docs on send-message → check-code → wait for a yes before the PR.',
+    },
+    remove: {
+      label: 'Cleanup 400',
+      body: 'Customer called DeleteUsers, then UpdateChannel removeMembers to tidy the group. 400 / code 4: “Unable to update a channel with deleted user.” GDPR docs never mention this. There is no exception_fields. The leave message on the same request is never stored. This is Gap 2.',
+      next: 'Agent path: chat skill → GDPR + members pages → ValidateChannelMembers → proposed/chat-update-channel-deleted-user.md. Do not name the customer in the PR.',
+    },
+    query: {
+      label: 'QueryUsers empty',
+      body: 'queryUsers always excludes deleted_at IS NOT NULL. Never existed, soft-deleted, and hard-deleted all look the same. Empty is not a reliable “this user was deleted” signal, and there is no include_deleted flag.',
+      next: 'This is part of Gap 2, not a separate PR. Tell them to poll GetTask instead of inferring from queryUsers.',
+    },
+    notfound: {
+      label: 'Channel gone',
+      body: '404 / code 16 on this path means the channel was not found. It is not “already removed from the channel” and it is not the deleted-user InputError (that is 4).',
+      next: 'Not a docs gap by itself. Stop this cid. Do not treat 16 as 4.',
+    },
+    timeout: {
+      label: 'Hang then 408',
+      body: '408 is Stream code 48 (request timeout), not 23. Retry. Same bucket as 429 / 9 and 500 / -1 — retry, do not skip.',
+      next: 'Not a docs gap. The helper exists so people stop mapping 408 to the wrong code.',
+    },
+  };
+
+  const PRESETS = {
+    deleted400: { http: '400', code: '4', deleted: true, query: false },
+    timeout: { http: '408', code: '48', deleted: false, query: false },
+    notfound: { http: '404', code: '16', deleted: false, query: false },
+    ratelimit: { http: '429', code: '9', deleted: false, query: false },
+    queryempty: { http: '201', code: '0', deleted: false, query: true },
+  };
+  const SCENARIO_PRESET = {
+    empty: null,
+    remove: 'deleted400',
+    query: 'queryempty',
+    notfound: 'notfound',
+    timeout: 'timeout',
+  };
+
+  function applyPreset(name) {
+    const p = PRESETS[name];
+    if (!p) return;
+    document.getElementById('http-status').value = p.http;
+    document.getElementById('stream-code').value = p.code;
+    document.getElementById('msg-deleted').checked = p.deleted;
+    document.getElementById('query-empty').checked = p.query;
+    classify();
+  }
+
+  function signOff(body) {
+    return 'Hi,\n\n' + body + '\n\nCheers Seetha';
+  }
+
+  function setOutcome(label, color, explain, reply) {
+    const result = document.getElementById('skip-result');
+    result.textContent = label;
+    result.style.color = color;
+    document.getElementById('skip-explain').textContent = explain;
+    document.getElementById('reply-text').textContent = reply;
+  }
+
+  function renderScenario() {
+    const picked = document.querySelector('input[name="scenario"]:checked');
+    if (!picked) return;
+    const s = SCENARIOS[picked.value];
+    document.getElementById('sc-label').textContent = s.label;
+    document.getElementById('sc-body').textContent = s.body;
+    document.getElementById('sc-next').textContent = s.next;
+    const preset = SCENARIO_PRESET[picked.value];
+    if (preset) applyPreset(preset);
+  }
+  document.querySelectorAll('input[name="scenario"]').forEach((el) => {
+    el.addEventListener('change', renderScenario);
+  });
+  document.getElementById('preset-row').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-preset]');
+    if (btn) applyPreset(btn.dataset.preset);
+  });
+
+  function classify() {
+    const http = document.getElementById('http-status').value;
+    const code = document.getElementById('stream-code').value;
+    const deletedMsg = document.getElementById('msg-deleted').checked;
+    const queryEmpty = document.getElementById('query-empty').checked;
+
+    if (http === '201') {
+      const extra = queryEmpty
+        ? ' An empty queryUsers is not proof the user was deleted — poll GetTask.'
+        : '';
+      setOutcome(
+        queryEmpty ? 'Not a deleted signal' : 'Succeeded',
+        queryEmpty ? 'var(--warn)' : 'var(--success)',
+        queryEmpty
+          ? 'queryUsers always hides deleted users. Empty means never existed, soft-deleted, or hard-deleted. Poll GetTask.'
+          : '2xx on UpdateChannel. If this was removeMembers of a deleted user, you would not be here — that path 400s first.',
+        signOff(queryEmpty
+          ? 'queryUsers does not return deleted users, so an empty result is not a deleted signal. Never existed, soft-deleted, and hard-deleted all look the same. Poll GetTask instead.'
+          : 'That UpdateChannel succeeded. If you were trying to remove a deleted user, you would have seen 400 / code 4 instead.' + extra)
+      );
+      return;
+    }
+
+    if (http === '400' && code === '4' && deletedMsg) {
+      setOutcome(
+        'Skip',
+        'var(--danger)',
+        'ValidateChannelMembers rejected DeletedAt. Do not retry removeMembers. Poll GetTask; skip that user once it completes.',
+        signOff('That 400 / code 4 is expected after DeleteUsers. UpdateChannel removeMembers of a deleted user is rejected (no exception_fields). The leave / system message on the same request is not stored.\n\nPoll GetTask. When it is completed, skip removeMembers for that user. Retry 429, 408 (that is code 48, not 23), and 5xx. An empty queryUsers is not proof the user was deleted.')
+      );
+      return;
+    }
+
+    if (http === '400' && code === '4') {
+      setOutcome(
+        'Skip · inspect message',
+        'var(--danger)',
+        'Code 4 is InputError. If the message is “deleted user” or “don’t exist”, skip. Other 4s are a different bad request.',
+        signOff('That is InputError (400 / code 4). If the message contains “deleted user” or “don’t exist”, skip removeMembers and poll GetTask. If it is a different 4, it is a separate bad request — paste the message body and we can check.')
+      );
+      return;
+    }
+
+    if (http === '404' || code === '16') {
+      setOutcome(
+        'Stop this cid',
+        'var(--warn)',
+        'Code 16 is channel not found, not “already removed.” Different from the deleted-user 400.',
+        signOff('That 404 / code 16 means the channel was not found. It is not “already removed from the channel” and it is not the deleted-user error (that one is 400 / code 4). Stop this cid.')
+      );
+      return;
+    }
+
+    if (http === '408' || code === '48') {
+      setOutcome(
+        'Retry',
+        'var(--success)',
+        '408 is Stream code 48, not 23. Transient. Retry.',
+        signOff('That is a request timeout — HTTP 408, Stream code 48 (not 23). Retry it. This is not the deleted-user skip.')
+      );
+      return;
+    }
+
+    if (http === '429' || code === '9') {
+      setOutcome(
+        'Retry with backoff',
+        'var(--success)',
+        'Rate limited (code 9). Back off and retry.',
+        signOff('That 429 / code 9 is rate limiting. Back off and retry. This is not the deleted-user skip.')
+      );
+      return;
+    }
+
+    if (http === '500' || code === '-1') {
+      setOutcome(
+        'Retry',
+        'var(--success)',
+        'Internal error (code -1). Retry. Do not treat this as a deleted-user skip.',
+        signOff('That 500 / code -1 is an internal error. Retry it. This is not the deleted-user skip (that one is 400 / code 4).')
+      );
+      return;
+    }
+
+    if (queryEmpty) {
+      setOutcome(
+        'Not a deleted signal',
+        'var(--warn)',
+        'queryUsers always hides deleted users. Empty means never existed, soft-deleted, or hard-deleted. Poll GetTask.',
+        signOff('queryUsers does not return deleted users, so an empty result is not a deleted signal. Poll GetTask instead.')
+      );
+      return;
+    }
+
+    setOutcome(
+      'Look closer',
+      'var(--ink)',
+      'This mix is not the deleted-user skip rule. Check the message body before you retry or skip.',
+      signOff('This status / code mix is not the deleted-user skip rule. Can you paste the HTTP status, Stream code, and error message?')
+    );
+  }
+
+  function fallbackCopy(text, highlightEl) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+    document.body.removeChild(ta);
+    if (!ok && highlightEl) {
+      const range = document.createRange();
+      range.selectNodeContents(highlightEl);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+    return ok;
+  }
+
+  async function copyFrom(btn) {
+    const kind = btn.dataset.copy;
+    const el = kind === 'reply'
+      ? document.getElementById('reply-text')
+      : document.getElementById('team-update');
+    const text = kind === 'reply' ? el.textContent : el.innerText;
+    const label = btn.textContent;
+    let ok = false;
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text);
+        ok = true;
+      } catch (err) { ok = false; }
+    }
+    if (!ok) ok = fallbackCopy(text, el);
+    btn.textContent = ok ? 'Copied' : 'Text selected — ⌘C';
+    setTimeout(() => { btn.textContent = label; }, 1600);
+  }
+  document.querySelectorAll('[data-copy]').forEach((btn) => {
+    btn.addEventListener('click', () => copyFrom(btn));
+  });
+
+  ['http-status', 'stream-code', 'msg-deleted', 'query-empty'].forEach((id) => {
+    document.getElementById(id).addEventListener('change', classify);
+  });
+  renderScenario();
+  classify();
+</script>
+
+</body>
+</html>

@@ -3,14 +3,8 @@ description: Chat docs gaps — messages, webhooks, request_info, empty text, SD
 deadline: 5m
 ---
 
-You are the Chat playbook. Read `reference/` only when the topic matches.
+You are the Chat playbook. For empty `text: ""`, read `reference/empty-text.md`. For DeleteUsers vs `removeMembers`, read `../../knowledge/deleted-user-update-channel.md`.
 
-Known first gap: empty `text: ""` — read `reference/empty-text.md`.
+Other holes: `request_info.sdk` / `x-stream-client`, webhooks `message.new`, custom fields (`region`, `legacyId`), GDPR async memberships.
 
-Other Chat holes you may see:
-
-- `request_info.sdk` / `x-stream-client` (mobile vs web)
-- webhooks `message.new`
-- custom fields flattened on the message (`region`, `legacyId`)
-
-Always hand off to `verify-docs` then `check-code`. Do not open a PR yourself.
+Always run verify-docs then check-code. Do not open a PR yourself.
