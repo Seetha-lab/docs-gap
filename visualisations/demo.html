@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Docs Gap — Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #12110f;
+    --surface: #1c1a17;
+    --surface-2: #26231f;
+    --ink: #f3eee6;
+    --muted: #9a948a;
+    --line: #3a3530;
+    --accent: #e08a6e;
+    --accent-2: #7eb8a0;
+    --warn: #d4a35c;
+    --font: "DM Sans", system-ui, sans-serif;
+    --serif: "Instrument Serif", Georgia, serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%;
+    background: var(--bg); color: var(--ink);
+    font-family: var(--font);
+    overflow: hidden;
+  }
+  .stage {
+    position: relative;
+    width: 100vw; height: 100vh;
+    display: grid;
+    place-items: center;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, #2a221c 0%, transparent 55%),
+      var(--bg);
+  }
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 6vh 8vw;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+    transition: opacity 0.55s ease, transform 0.55s ease;
+  }
+  .slide.on {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+  .inner { width: min(920px, 100%); }
+  .eyebrow {
+    font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent); font-weight: 600; margin: 0 0 14px;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(42px, 7vw, 72px);
+    line-height: 1.05;
+    margin: 0 0 18px;
+  }
+  h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(28px, 4vw, 42px);
+    line-height: 1.15;
+    margin: 0 0 16px;
+  }
+  p.lead {
+    font-size: clamp(17px, 2vw, 21px);
+    color: var(--muted);
+    max-width: 38em;
+    margin: 0 0 28px;
+    line-height: 1.5;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-top: 8px;
+  }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--line);
+    font-size: 14px; color: var(--ink);
+  }
+  .pill b { color: var(--accent); font-weight: 600; }
+  .steps {
+    display: grid; gap: 10px; margin-top: 8px;
+  }
+  .step {
+    display: grid; grid-template-columns: 36px 1fr; gap: 14px;
+    align-items: start;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  .step .n {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: grid; place-items: center;
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    color: var(--accent); font-weight: 700; font-size: 14px;
+  }
+  .step strong { display: block; font-size: 15px; margin-bottom: 2px; }
+  .step span { color: var(--muted); font-size: 14px; line-height: 1.4; }
+  .chat {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+    font-size: 14.5px;
+  }
+  .chat-hd {
+    padding: 12px 16px; border-bottom: 1px solid var(--line);
+    color: var(--muted); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .bubble {
+    margin: 14px 16px; padding: 12px 14px; border-radius: 12px;
+    max-width: 85%; line-height: 1.45;
+    white-space: pre-wrap;
+  }
+  .bubble.user { background: var(--surface-2); margin-left: auto; }
+  .bubble.bot {
+    background: color-mix(in srgb, var(--accent-2) 12%, var(--surface-2));
+    border: 1px solid color-mix(in srgb, var(--accent-2) 35%, var(--line));
+  }
+  .bubble .label { font-size: 11px; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.04em; text-transform: uppercase; }
+  code, .mono { font-family: var(--mono); font-size: 0.92em; }
+  .gap-box {
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px;
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+    border-radius: 0 10px 10px 0;
+    margin: 10px 0;
+  }
+  .wait {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 10px; padding: 8px 12px; border-radius: 8px;
+    background: color-mix(in srgb, var(--warn) 18%, transparent);
+    color: var(--warn); font-weight: 600; font-size: 13px;
+  }
+  .controls {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; padding: 14px 22px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.75));
+    z-index: 5;
+  }
+  .progress {
+    flex: 1; height: 4px; background: var(--line); border-radius: 99px; overflow: hidden;
+  }
+  .progress > i {
+    display: block; height: 100%; width: 0%;
+    background: var(--accent); border-radius: 99px;
+    transition: width 0.2s linear;
+  }
+  button {
+    font-family: var(--font);
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--ink);
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button.primary { background: var(--accent); border-color: transparent; color: #1a120f; }
+  button:disabled { opacity: 0.45; cursor: default; }
+  .meta { color: var(--muted); font-size: 13px; min-width: 110px; }
+  .start-overlay {
+    position: absolute; inset: 0; z-index: 10;
+    display: grid; place-items: center;
+    background: rgba(18,17,15,0.92);
+    backdrop-filter: blur(6px);
+  }
+  .start-overlay.hidden { display: none; }
+  .start-card {
+    text-align: center; max-width: 420px; padding: 28px;
+  }
+  .start-card h1 { font-size: 48px; margin-bottom: 8px; }
+  .hint { color: var(--muted); font-size: 14px; margin-top: 14px; }
+  .two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 720px) {
+    .two { grid-template-columns: 1fr; }
+    .controls { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <div class="start-overlay" id="start">
+      <div class="start-card">
+        <p class="eyebrow">Sovereign AI · Stream</p>
+        <h1>Docs Gap</h1>
+        <p class="lead" style="margin: 0 auto 22px;">~2 minute demo. Full screen, then press play — or screen-record with your voiceover.</p>
+        <button class="primary" id="playBtn" type="button">Play demo</button>
+        <p class="hint">Space = pause · ← → = step · R = restart</p>
+      </div>
+    </div>
+
+    <!-- 0 -->
+    <section class="slide" data-dur="7000">
+      <div class="inner">
+        <p class="eyebrow">Meet the agent</p>
+        <h1>Docs Gap</h1>
+        <p class="lead">Finds a hole in official Stream docs, proves it from the page and the code, then opens a PR — only after a human says yes.</p>
+        <div class="row">
+          <span class="pill"><b>Not</b> Zendesk</span>
+          <span class="pill"><b>Not</b> customer-app queries</span>
+          <span class="pill"><b>Human gate</b> before PR</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1 -->
+    <section class="slide" data-dur="9000">
+      <div class="inner">
+        <p class="eyebrow">The loop</p>
+        <h2>Ask → verify → code → confirm → ship</h2>
+        <div class="steps">
+          <div class="step"><div class="n">1</div><div><strong>Ask</strong><span>Customer question, ticket dump, or a docs URL that feels wrong</span></div></div>
+          <div class="step"><div class="n">2</div><div><strong>verify-docs</strong><span>Official getstream.io pages only</span></div></div>
+          <div class="step"><div class="n">3</div><div><strong>check-code</strong><span>Code wins when docs and code disagree</span></div></div>
+          <div class="step"><div class="n">4</div><div><strong>Confirm</strong><span>Show the patch. Wait for yes. Then open-pr.</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide" data-dur="11000">
+      <div class="inner">
+        <p class="eyebrow">Live shape of a session</p>
+        <h2>Smoke prompt</h2>
+        <div class="chat">
+          <div class="chat-hd">Docs Gap · session</div>
+          <div class="bubble user"><div class="label">You</div>When will a message have text: "" ?</div>
+          <div class="bubble bot"><div class="label">Docs Gap</div><div class="gap-box"><strong>Gap</strong> — Send-message docs say <span class="mono">text</span> is optional. They don’t say when empty is valid (UI vs API, empty twins).</div>
+<strong>Docs</strong> — official send-message page<br/>
+<strong>Code</strong> — API allows empty; default Android composer does not<br/>
+<strong>Patch</strong> — short paragraph for the docs
+            <div class="wait">⏸ Waiting — PR or Linear? (say yes / no)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide" data-dur="9000">
+      <div class="inner">
+        <p class="eyebrow">Already verified</p>
+        <h2>Two real gaps</h2>
+        <div class="two">
+          <div class="card">
+            <strong>Empty text</strong>
+            <p style="color:var(--muted);margin:8px 0 0;font-size:14px;line-height:1.45;">When can Chat <span class="mono">text</span> be <span class="mono">""</span>? Docs leave it vague; API vs default UI disagree.</p>
+          </div>
+          <div class="card">
+            <strong>Deleted user removeMembers</strong>
+            <p style="color:var(--muted);margin:8px 0 0;font-size:14px;line-height:1.45;">GDPR delete is async. <span class="mono">UpdateChannel</span> / remove of a deleted id → <strong>400 / code 4</strong>. Docs don’t say that.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide" data-dur="9000">
+      <div class="inner">
+        <p class="eyebrow">Sovereign AI surfaces</p>
+        <h2>What this exercise hits</h2>
+        <div class="row" style="margin-top:8px;">
+          <span class="pill">Conversation loop</span>
+          <span class="pill">Nested skills</span>
+          <span class="pill">Connectors (GitHub / Linear / Slack)</span>
+          <span class="pill">Beta CLI sync</span>
+          <span class="pill">Dashboard session</span>
+        </div>
+        <p class="lead" style="margin-top:28px;margin-bottom:0;">Repo: github.com/Seetha-lab/docs-gap · Agent id <span class="mono">docs-gap</span></p>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide" data-dur="8000">
+      <div class="inner">
+        <p class="eyebrow">Try it</p>
+        <h2>Your turn</h2>
+        <div class="steps">
+          <div class="step"><div class="n">1</div><div><strong>Beta CLI</strong><span>date+hash build — not stable 1.1.0</span></div></div>
+          <div class="step"><div class="n">2</div><div><strong>init + sync</strong><span>Your own Stream app · folder → Dashboard agent</span></div></div>
+          <div class="step"><div class="n">3</div><div><strong>GitHub connector</strong><span>Label <span class="mono">company</span> for PRs</span></div></div>
+          <div class="step"><div class="n">4</div><div><strong>Smoke</strong><span>Empty-text prompt · confirm it waits · say no once</span></div></div>
+        </div>
+        <p class="lead" style="margin-top:22px;">Feedback → #hackathon-product-feedback</p>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide" data-dur="6000">
+      <div class="inner" style="text-align:center;">
+        <p class="eyebrow">Docs Gap</p>
+        <h1 style="font-size:clamp(36px,6vw,64px);">Find the hole.<br/>Prove it. Wait for yes.</h1>
+        <p class="lead" style="margin-inline:auto;">github.com/Seetha-lab/docs-gap</p>
+      </div>
+    </section>
+  </div>
+
+  <div class="controls">
+    <span class="meta" id="meta">0 / 0</span>
+    <div class="progress" aria-hidden="true"><i id="bar"></i></div>
+    <div class="row">
+      <button type="button" id="prevBtn">Prev</button>
+      <button type="button" id="pauseBtn">Pause</button>
+      <button type="button" class="primary" id="nextBtn">Next</button>
+    </div>
+  </div>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  const start = document.getElementById('start');
+  const bar = document.getElementById('bar');
+  const meta = document.getElementById('meta');
+  const pauseBtn = document.getElementById('pauseBtn');
+  let i = 0, playing = false, paused = false, t0 = 0, raf = 0, remain = 0;
+
+  function show(n) {
+    slides.forEach((s, idx) => s.classList.toggle('on', idx === n));
+    i = n;
+    meta.textContent = `${i + 1} / ${slides.length}`;
+    bar.style.width = '0%';
+  }
+
+  function duration() {
+    return Number(slides[i].dataset.dur || 7000);
+  }
+
+  function tick(now) {
+    if (!playing || paused) return;
+    const elapsed = now - t0;
+    const d = remain || duration();
+    bar.style.width = Math.min(100, (elapsed / d) * 100) + '%';
+    if (elapsed >= d) {
+      remain = 0;
+      if (i < slides.length - 1) {
+        show(i + 1);
+        t0 = performance.now();
+        raf = requestAnimationFrame(tick);
+      } else {
+        playing = false;
+        pauseBtn.textContent = 'Replay';
+        bar.style.width = '100%';
+      }
+      return;
+    }
+    raf = requestAnimationFrame(tick);
+  }
+
+  function playFrom(n) {
+    cancelAnimationFrame(raf);
+    start.classList.add('hidden');
+    show(n);
+    playing = true;
+    paused = false;
+    remain = 0;
+    pauseBtn.textContent = 'Pause';
+    t0 = performance.now();
+    raf = requestAnimationFrame(tick);
+  }
+
+  document.getElementById('playBtn').onclick = () => playFrom(0);
+  document.getElementById('nextBtn').onclick = () => {
+    if (i < slides.length - 1) playFrom(i + 1);
+  };
+  document.getElementById('prevBtn').onclick = () => {
+    if (i > 0) playFrom(i - 1);
+  };
+  pauseBtn.onclick = () => {
+    if (!playing && pauseBtn.textContent === 'Replay') {
+      playFrom(0);
+      return;
+    }
+    if (!playing) return;
+    if (!paused) {
+      paused = true;
+      remain = Math.max(0, (remain || duration()) - (performance.now() - t0));
+      pauseBtn.textContent = 'Resume';
+      cancelAnimationFrame(raf);
+    } else {
+      paused = false;
+      pauseBtn.textContent = 'Pause';
+      t0 = performance.now();
+      raf = requestAnimationFrame(tick);
+    }
+  };
+
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') { e.preventDefault(); pauseBtn.click(); }
+    if (e.code === 'ArrowRight') document.getElementById('nextBtn').click();
+    if (e.code === 'ArrowLeft') document.getElementById('prevBtn').click();
+    if (e.key === 'r' || e.key === 'R') playFrom(0);
+  });
+
+  show(0);
+  meta.textContent = `1 / ${slides.length}`;
+</script>
+</body>
+</html>
