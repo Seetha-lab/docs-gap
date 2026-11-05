@@ -1,27 +1,24 @@
+# yaml-language-server: $schema=./agent.schema.json
 name: docs-gap
-description: Finds a hole in Stream docs, checks the official page and the code, then opens a GitHub PR or a Linear issue.
+description: "Docs Gap — finds a hole in Stream docs, checks the official page and the code, then opens a GitHub PR or a Linear issue (human must say yes)."
 mode: text
 llm: llm-fast
-tools:
-  progressive: true
 
-# Catalog MCP (connect once on the dashboard, label company).
-# GitHub writes the PR. Linear is the fallback if docs are not in a repo we can branch.
-# Slack posts the gap so any team can see it.
+# Catalog connectors (hosted MCP). A name-only entry is a session login —
+# the agent asks you to connect GitHub in the chat.
+# After Library → Connectors has a shared GitHub login labelled "company",
+# set connection: company on github so every session uses that one.
 connectors:
   - name: github
+    connector: github
     connection: company
+    required: true
   - name: linear
-    connection: company
-    tools:
-      - list_issues
-      - get_issue
-      - save_issue
-      - save_comment
-      - list_teams
+    connector: linear
   - name: slack
+    connector: slack
 
-# Extra MCP servers go here when we have a docs MCP URL. Do not invent one.
+# Extra MCP servers (not the catalog). Add a URL only when we have a real one.
 # mcp_servers:
 #   - name: stream-docs
 #     url: https://example.com/mcp

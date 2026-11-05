@@ -1,0 +1,349 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Stream Agent",
+  "description": "agent.yaml: what a Stream Agent is called and runs on. A key left out keeps whatever is stored on Stream.",
+  "$comment": "Written by getstream agents init. Edits are overwritten. The shortcuts are the router's aliases; a provider/model is always allowed.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+      "description": "What the agent is called. Must match the directory's name."
+    },
+    "description": {
+      "type": "string",
+      "description": "What the agent does, for whoever reads the directory."
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "voice",
+        "text"
+      ],
+      "default": "voice",
+      "description": "voice joins a call, transcribes the caller and speaks its replies; text holds the conversation in writing."
+    },
+    "llm": {
+      "description": "The model holding the conversation: a provider/model or a capability shortcut.",
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "llm-fast",
+            "llm-smart",
+            "llm-thinking",
+            "llm-conversational",
+            "llm-flow",
+            "llm-analysis",
+            "llm-judge",
+            "llm-scenario-runner",
+            "vlm",
+            "en-high-accuracy",
+            "en-low-latency",
+            "multilingual-high-accuracy",
+            "multilingual-low-latency"
+          ],
+          "description": "A capability shortcut the router resolves to a model."
+        },
+        {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[^\\s]+$",
+          "description": "A provider/model, such as openai/gpt-5.6."
+        }
+      ]
+    },
+    "subagent": {
+      "description": "The model a voice agent hands its skills to while the voice model keeps talking. A text agent takes none: its llm loads its skills itself. Without one, a voice agent hands them to llm-thinking when the deployment routes it, and answers everything itself when it does not.",
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "llm-thinking",
+            "llm-smart",
+            "llm-fast",
+            "llm-analysis",
+            "vlm",
+            "llm-conversational",
+            "llm-flow",
+            "llm-judge",
+            "llm-scenario-runner",
+            "en-high-accuracy",
+            "en-low-latency",
+            "multilingual-high-accuracy",
+            "multilingual-low-latency"
+          ],
+          "description": "A capability shortcut the router resolves to a model."
+        },
+        {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[^\\s]+$",
+          "description": "A provider/model, such as openai/gpt-5.6."
+        }
+      ]
+    },
+    "stt": {
+      "description": "The model that transcribes the caller. A text agent ignores it.",
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "stt-fast",
+            "stt-accurate",
+            "en-realtime-best",
+            "en-slow-best",
+            "en-recorded",
+            "multi-language-realtime-best",
+            "multi-language-slow-best",
+            "multilingual-recorded",
+            "en-high-accuracy",
+            "en-low-latency",
+            "multilingual-high-accuracy",
+            "multilingual-low-latency"
+          ],
+          "description": "A capability shortcut the router resolves to a model."
+        },
+        {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[^\\s]+$",
+          "description": "A provider/model, such as openai/gpt-5.6."
+        }
+      ]
+    },
+    "tts": {
+      "description": "The model that speaks the replies. A text agent ignores it.",
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "tts-fast",
+            "tts-quality",
+            "en-recorded",
+            "multilingual-recorded",
+            "en-high-accuracy",
+            "en-low-latency",
+            "multilingual-high-accuracy",
+            "multilingual-low-latency"
+          ],
+          "description": "A capability shortcut the router resolves to a model."
+        },
+        {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[^\\s]+$",
+          "description": "A provider/model, such as openai/gpt-5.6."
+        }
+      ]
+    },
+    "sts": {
+      "description": "One speech-to-speech model that hears the caller and speaks back; stt, tts and llm are then unused. An empty value turns it off.",
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "sts-fast",
+            "sts-vision",
+            "en-high-accuracy",
+            "en-low-latency",
+            "multilingual-high-accuracy",
+            "multilingual-low-latency"
+          ],
+          "description": "A capability shortcut the router resolves to a model."
+        },
+        {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[^\\s]+$",
+          "description": "A provider/model, such as openai/gpt-5.6."
+        }
+      ]
+    },
+    "voice": {
+      "type": "string",
+      "description": "A provider-specific voice id."
+    },
+    "search": {
+      "description": "What the agent finds out today's answers with: a provider/model or a capability shortcut.",
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "search-fast",
+            "en-high-accuracy",
+            "en-low-latency",
+            "multilingual-high-accuracy",
+            "multilingual-low-latency"
+          ],
+          "description": "A capability shortcut the router resolves to a model."
+        },
+        {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[^\\s]+$",
+          "description": "A provider/model, such as openai/gpt-5.6."
+        }
+      ]
+    },
+    "greeting": {
+      "description": "Said on joining a call, without going through the model.",
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "The text, said word for word."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "description": "What the agent says on joining. Empty means the agent waits to be spoken to."
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "exact",
+                "variation"
+              ],
+              "default": "exact",
+              "description": "exact says the text word for word; variation has the model say its own variation of it on every call."
+            }
+          },
+          "required": [
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "sandbox": {
+      "type": "string",
+      "enum": [
+        "daytona"
+      ],
+      "description": "Where the subagent may run code it writes. Omit it and the subagent works everything out in its head."
+    },
+    "plugins": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Deprecated: rename it to connectors. Hosted MCP servers the agent may reach, named from the built-in catalog."
+    },
+    "connectors": {
+      "type": "array",
+      "description": "Connectors whose tools the agent may call. A name alone is a session binding offering every tool. Sent, the list replaces the bindings stored; an empty list removes them.",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string",
+            "pattern": "^[a-z]([a-z0-9_-]{0,61}[a-z0-9-])?$",
+            "description": "A connector id. Bound as a session connection under that name, offering every tool. Never contains __."
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[a-z]([a-z0-9_-]{0,61}[a-z0-9-])?$",
+                "description": "The alias tools are offered under. A lowercase letter, then up to 62 lowercase letters, digits, - or _, never __ and not ending in _."
+              },
+              "connector": {
+                "type": "string",
+                "description": "The connector id. Defaults to name."
+              },
+              "connection": {
+                "type": "string",
+                "description": "A connection id, or the label of exactly one connection, bound fixed. Omitted, the binding is a session connection."
+              },
+              "tools": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                },
+                "description": "Tool names or path.Match patterns to offer. Omitted offers every tool."
+              },
+              "required": {
+                "type": "boolean",
+                "description": "Whether a session needs this connector. Omitted is false."
+              }
+            }
+          }
+        ]
+      }
+    },
+    "mcp_servers": {
+      "type": "array",
+      "description": "MCP servers outside the catalog, opened by their URL.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "url"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "What its tools are prefixed with, as <name>__<tool>."
+          },
+          "url": {
+            "type": "string",
+            "description": "Its Streamable HTTP endpoint."
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Offer only the tools matching these names or path.Match patterns. Omitted offers every tool."
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "OAuth scopes its login asks for. Omitted, the login asks for what the server advertises."
+          },
+          "user": {
+            "type": "boolean",
+            "description": "Each end user logs in with their own account. Omitted, the app logs in once."
+          }
+        }
+      }
+    },
+    "keyterms": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 100,
+      "description": "Words the transcriber would otherwise get wrong, such as product or company names."
+    },
+    "tags": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Cost labels carried onto every request the agent makes."
+    },
+    "video": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "What a skill with capture_video sees.",
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "A participant/track or a processor source. Omitted requires one unambiguous available source."
+        },
+        "max_frames": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8,
+          "default": 1,
+          "description": "How many recent frames are captured for a visual task."
+        }
+      }
+    },
+    "app": {
+      "type": "object",
+      "description": "The application's own section, never sent to Stream. The one place any key is allowed."
+    }
+  }
+}

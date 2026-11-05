@@ -1,0 +1,6 @@
+- url: https://getstream.io/chat/docs/javascript/send-message/
+  title: Send a message
+  description: Chat send-message page. text is optional. Does not explain empty twins.
+- url: https://getstream.io/chat/docs/javascript/webhooks_overview/
+  title: Webhooks overview
+  description: Chat webhooks. request_info / x-stream-client may be missing here.
